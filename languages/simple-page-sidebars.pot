@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Simple Page Sidebars\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-09 09:41-0800\n"
-"PO-Revision-Date: 2011-11-09 09:42-0800\n"
+"POT-Creation-Date: 2011-12-08 14:42-0800\n"
+"PO-Revision-Date: 2011-12-08 14:42-0800\n"
 "Last-Translator: Brady Vercher <brady@blazersix.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -13,39 +13,56 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: admin/admin.php:67
-msgid "Choose an existing sidebar:"
+#: admin/admin.php:28
+msgid " Default Sidebar"
 msgstr ""
 
-#: admin/admin.php:69
-#: admin/admin.php:183
-#: admin/admin.php:241
+#: admin/admin.php:54
+msgid "The sidebar that will replaced by custom sidebars."
+msgstr ""
+
+#: admin/admin.php:127
+#, php-format
+msgid "For Simple Page Sidebars to work, a default sidebar needs to be selected on the %s"
+msgstr ""
+
+#: admin/admin.php:128
+msgid "Reading options panel"
+msgstr ""
+
+#: admin/admin.php:134
+msgid "Current sidebar:"
+msgstr ""
+
+#: admin/admin.php:136
+#: admin/admin.php:244
+#: admin/admin.php:300
 msgid "Default Sidebar"
 msgstr ""
 
-#: admin/admin.php:78
+#: admin/admin.php:145
 msgid "Or create a new sidebar:"
 msgstr ""
 
-#: admin/admin.php:80
+#: admin/admin.php:147
 msgid "Enter New"
 msgstr ""
 
-#: admin/admin.php:81
+#: admin/admin.php:148
 msgid "Cancel"
 msgstr ""
 
-#: admin/admin.php:86
+#: admin/admin.php:153
 msgid "Update"
 msgstr ""
 
-#: admin/admin.php:154
-#: admin/admin.php:181
-#: admin/admin.php:238
+#: admin/admin.php:217
+#: admin/admin.php:242
+#: admin/admin.php:297
 msgid "Sidebar"
 msgstr ""
 
-#: admin/admin.php:240
+#: admin/admin.php:299
 msgid "&mdash; No Change &mdash;"
 msgstr ""
 
