@@ -4,7 +4,7 @@ Donate link: http://bit.ly/s2zcgD
 Tags: sidebars, custom sidebars, dynamic sidebar, simple, widget, widgets
 Requires at least: 3.2.1
 Tested up to: 3.2.1
-Stable tag: trunk
+Stable tag: 0.1
 
 Assign custom, widget-enabled sidebars to any page with ease.
 
