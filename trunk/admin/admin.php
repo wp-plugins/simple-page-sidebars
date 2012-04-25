@@ -1,10 +1,9 @@
 <?php
 class Simple_Page_Sidebars_Admin {
-	function Simple_Page_Sidebars_Admin() {
+	function __construct() {
 		add_action( 'init', array( &$this, 'init' ) );
 		add_action( 'admin_init', array( &$this, 'admin_init' ) );
 	}
-	
 	
 	function init() {
 		add_action( 'save_post', array( &$this, 'update_sidebar' ) );
@@ -19,21 +18,25 @@ class Simple_Page_Sidebars_Admin {
 		add_action( 'bulk_edit_custom_box', array( &$this, 'bulk_edit_custom_box' ), 10, 2 );
 	}
 	
-	
-	
-	/*
-	 * Methods for registering and saving the default sidebar on the Reading options panel
+	/**
+	 * Register setting for choosing the default sidebar
+	 *
+	 * @since 0.2
 	 */
 	function admin_init() {
-		add_settings_field( 'simple_page_sidebars_default_sidebar', '<label for="simple-page-sidebars-default-sidebar">' . __( ' Default Sidebar', 'simple-page-sidebars' ) . '</label>', array( &$this, 'settings_field_default_sidebar_dropdown' ), 'reading' );
+		add_settings_field( 'simple_page_sidebars_default_sidebar', '<label for="simple-page-sidebars-default-sidebar">' . __( ' Default Sidebar', 'simple-page-sidebars' ) . '</label>', array( &$this, 'default_sidebar_settings_field' ), 'reading' );
 		register_setting( 'reading', 'simple_page_sidebars_default_sidebar', array( &$this, 'register_reading_setting' ) );
 	}
 	
-	
 	function register_reading_setting( $input ) { return $input; }
 	
-	
-	function settings_field_default_sidebar_dropdown() {
+	/**
+	 * Default sidebar option dropdown
+	 *
+	 * @since 0.2
+	 * @uses $wp_registered_sidebars
+	 */
+	function default_sidebar_settings_field() {
 		global $wp_registered_sidebars;
 		$default_sidebar_id = get_option( 'simple_page_sidebars_default_sidebar' );
 		
@@ -44,9 +47,11 @@ class Simple_Page_Sidebars_Admin {
 			<?php
 			foreach ( $wp_registered_sidebars as $sb ) {
 				if ( is_array( $custom_sidebars ) && ! in_array( $sb['name'], $custom_sidebars ) ) {
-					echo '<option value="' . esc_attr( $sb['id'] ) . '"';
-					selected( $sb['id'], $default_sidebar_id );
-					echo '>' . esc_html( $sb['name'] ) . '</option>';
+					printf( '<option value="%s"%s>%s</option>',
+						esc_attr( $sb['id'] ),
+						selected( $sb['id'], $default_sidebar_id, false ),
+						esc_html( $sb['name'] )
+					);
 				}
 			}
 			?>
@@ -55,63 +60,66 @@ class Simple_Page_Sidebars_Admin {
 		<?php
 	}
 	
-	
-	
-	/*
-	 * Super method for saving page sidebars
+	/**
+	 * Save custom page sidebar
+	 *
+	 * Processes AJAX requests and normal post backs.
+	 * @since 0.2
 	 */
 	function update_sidebar( $post_id = 0 ) {
-		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
-			return $post_id;
-		
-		if ( $post_id == 0 )
+		if ( 0 == $post_id )
 			$post_id = $_POST['post_id'];
 		
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) || 'page' != get_post_type( $post_id ) )
+			return $post_id;
 		
 		// verify either an individual post nonce or the bulk edit nonce
 		// requests can come from a page update, ajax from the sidebar meta box, quick edit, or bulk edit
 		$sidebar_name_nonce = ( isset( $_REQUEST['sidebar_name_nonce'] ) && wp_verify_nonce( $_REQUEST['sidebar_name_nonce'], 'update-page-sidebar-name-' . $post_id ) ) ? true : false;
 		$bulk_sidebar_name_nonce = ( isset( $_REQUEST['bulk_sidebar_name_nonce'] ) && wp_verify_nonce( $_REQUEST['bulk_sidebar_name_nonce'], 'bulk-update-page-sidebar-name' ) ) ? true : false;
 		if ( ! $sidebar_name_nonce && ! $bulk_sidebar_name_nonce ) {
-			if ( defined( 'DOING AJAX' ) && DOING_AJAX ) {
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 				exit;
 			} else {
 				return;
 			}
 		}
 		
-		if ( ! wp_is_post_revision( $post_id ) && 'page' == get_post_type( $post_id ) ) {
-			// if 'new_sidebar_name' is set and not empty, it supercedes any 'sidebar_name' setting
-			// if 'sidebar_name' is blank or it equals 'default', delete meta
-			// if 'sidebar_name' is set and not empty, update to new name
-			// if 'sidebar_name' is -1, skip
+		// if 'new_sidebar_name' is set and not empty, it supercedes any 'sidebar_name' setting
+		// if 'sidebar_name' is blank or it equals 'default', delete meta
+		// if 'sidebar_name' is set and not empty, update to new name
+		// if 'sidebar_name' is -1, skip
+		
+		// bulk edit uses $_GET for some reason, so we use the $_REQUEST global
+		if ( isset( $_REQUEST['new_sidebar_name' ] ) && ! empty( $_REQUEST['new_sidebar_name'] ) ) {
+			update_post_meta( $post_id, '_sidebar_name', $_REQUEST['new_sidebar_name'] );
+		} else {
+			// if $_REQUEST['sidebar_name'] isn't set, we don't want to update the sidebar meta value
+			$sidebar = ( isset( $_REQUEST['sidebar_name'] ) ) ? $_REQUEST['sidebar_name'] : -1;
 			
-			// bulk edit uses $_GET for some reason, so we use the $_REQUEST global
-			if ( isset( $_REQUEST['new_sidebar_name' ] ) && ! empty( $_REQUEST['new_sidebar_name'] ) ) {
-				update_post_meta( $post_id, '_sidebar_name', $_REQUEST['new_sidebar_name'] );
-			} else {
-				// if $_REQUEST['sidebar_name'] isn't set, we don't want to update the sidebar meta value
-				$sidebar = ( isset( $_REQUEST['sidebar_name'] ) ) ? $_REQUEST['sidebar_name'] : -1;
-				
-				if ( empty( $sidebar ) || 'default' == $sidebar ) {
-					delete_post_meta( $post_id, '_sidebar_name' );
-				} elseif ( -1 != intval( $sidebar ) ) {
-					update_post_meta( $post_id, '_sidebar_name', $_REQUEST['sidebar_name'] );
-				}
+			if ( empty( $sidebar ) || 'default' == $sidebar ) {
+				delete_post_meta( $post_id, '_sidebar_name' );
+			} elseif ( -1 != intval( $sidebar ) ) {
+				update_post_meta( $post_id, '_sidebar_name', $_REQUEST['sidebar_name'] );
 			}
 		}
-		
-		if ( defined( 'DOING AJAX' ) && DOING_AJAX )
-			exit;
 	}
 	
-	
+	/**
+	 * Register sidebar meta box
+	 *
+	 * @since 0.2
+	 */
 	function add_sidebar_meta_box() {
-		// wish the Page Attributes meta box had a hook. oh well.
 		add_meta_box( 'simplepagesidebarsdiv', 'Sidebar', array( &$this, 'sidebar_meta_box' ), 'page', 'side', 'core' );
 	}
 	
-	
+	/**
+	 * Meta box for adding a new sidebar or choosing an existing sidebar
+	 *
+	 * @since 0.2
+	 * @uses $wp_registered_sidebars, $wpdb
+	 */
 	function sidebar_meta_box( $page ) {
 		global $wp_registered_sidebars, $wpdb;
 		
@@ -136,9 +144,11 @@ class Simple_Page_Sidebars_Admin {
 				<option value="default"><?php _e( 'Default Sidebar', 'simple-page-sidebars' ); ?></option>
 				<?php
 				foreach ( $custom_sidebars as $sb ) {
-					echo '<option value="' . esc_attr( $sb ) . '"';
-					selected( $sb, $sidebar );
-					echo '>' . esc_html( $sb ) . '</option>';
+					printf( '<option value="%s"%s>%s</option>',
+						esc_attr( $sb ),
+						selected( $sb, $sidebar, false ),
+						esc_html( $sb )
+					);
 				}
 				?>
 			</select>
@@ -206,19 +216,21 @@ class Simple_Page_Sidebars_Admin {
 		<?php
 	}
 	
-	
-	
-	/*
-	 * Quick Edit & Bulk Edit Implementation
+	/**
+	 * Register sidebar column on All Pages screen
 	 *
-	 * quick edit ain't so quick to implement
+	 * @since 0.2
 	 */
 	function manage_pages_columns( $columns ) {
 		$columns['sidebar'] = __( 'Sidebar', 'simple-page-sidebars' );
 		return $columns;
 	}
 	
-	
+	/**
+	 * Display sidebar column on All Pages screen
+	 *
+	 * @since 0.2
+	 */
 	function manage_pages_custom_column( $column, $page_id ) {
 		if ( 'sidebar' == $column ) {
 			$sidebar = get_post_meta( $page_id, '_sidebar_name', true );
@@ -229,9 +241,14 @@ class Simple_Page_Sidebars_Admin {
 		}
 	}
 	
-	
+	/**
+	 * Sidebar dropdown field for quick edit mode
+	 *
+	 * @since 0.2
+	 */
 	function quick_edit_custom_box( $column, $post_type ) {
-		if ( 'page' != $post_type || 'sidebar' != $column ) { return; }
+		if ( 'page' != $post_type || 'sidebar' != $column )
+			return;
 		
 		$sidebars = simple_page_sidebars_get_names();
 		?>
@@ -244,7 +261,7 @@ class Simple_Page_Sidebars_Admin {
 							<option value="default"><?php _e( 'Default Sidebar', 'simple-page-sidebars' ); ?></option>
 							<?php
 							foreach ( $sidebars as $sb ) {
-								echo '<option value="' . $sb . '">' . $sb . '</option>';
+								printf( '<option value="%1$s">%1$s</option>', $sb );
 							}
 							?>
 						</select>
@@ -255,14 +272,22 @@ class Simple_Page_Sidebars_Admin {
 		<?php
 	}
 	
-	
+	/**
+	 * Quick edit javascript
+	 *
+	 * Selects the correct sidebar during quick edit and copies the nonce for saving.
+	 *
+	 * @since 0.2
+	 */
 	function quick_edit_js() {
-		global $current_screen;
-		if ( 'edit-page' != $current_screen->id || 'page' != $current_screen->post_type ) { return;  }
+		$current_screen = get_current_screen();
+		
+		if ( 'edit-page' != $current_screen->id || 'page' != $current_screen->post_type )
+			return;
 		?>
 		<script type="text/javascript">
 		jQuery(function($) {
-			$('table.pages').delegate('a.editinline', 'click', function(e) {
+			$('table.pages').on('click', 'a.editinline', function(e) {
 				inlineEditPost.revert();
 				
 				var id = inlineEditPost.getId(this);
@@ -285,7 +310,11 @@ class Simple_Page_Sidebars_Admin {
 		<?php
 	}
 	
-	
+	/**
+	 * Sidebar dropdown field for bulk edit mode
+	 *
+	 * @since 0.2
+	 */
 	function bulk_edit_custom_box( $column, $post_type ) {
 		if ( 'page' != $post_type || 'sidebar' != $column ) { return; }
 		
@@ -300,7 +329,7 @@ class Simple_Page_Sidebars_Admin {
 						<option value="default"><?php _e( 'Default Sidebar', 'simple-page-sidebars' ); ?></option>
 						<?php
 						foreach ( $sidebars as $sb ) {
-							echo '<option value="' . $sb . '">' . $sb . '</option>';
+							printf( '<option value="%1$s">%1$s</option>', $sb );
 						}
 						?>
 					</select>

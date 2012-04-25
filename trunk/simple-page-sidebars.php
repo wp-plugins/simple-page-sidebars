@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Simple Page Sidebars
-Version: 0.2
+Version: 0.2.1
 Plugin URI: http://wordpress.org/extend/plugins/simple-page-sidebars/
 Description: Assign custom, widget-enabled sidebars to any page with ease.
 Author: Blazer Six, Inc.
@@ -10,22 +10,25 @@ Author URI: http://www.blazersix.com/
 
 
 class Simple_Page_Sidebars {
-	
 	function __construct() {
 		add_action( 'plugins_loaded', array( &$this, 'load_plugin' ) );
 	}
 	
-	
+	/**
+	 * Setup the plugin
+	 *
+	 * @since 0.2
+	 */
 	function load_plugin() {
 		load_plugin_textdomain( 'simple-page-sidebars', false, 'simple-page-sidebars/languages' );
 		
-		require_once( plugin_dir_path( __FILE__ ) .'/includes/widget-area.php' );
+		require_once( plugin_dir_path( __FILE__ ) . '/includes/widget-area.php' );
 		
 		if ( is_admin() ) {
 			require_once( plugin_dir_path( __FILE__ ) . 'admin/admin.php' );
 		}
 		
-		// Lower priority registers sidebars below those typically added in themes
+		// lower priority registers sidebars below those typically added in themes
 		add_action( 'widgets_init', array( &$this, 'register_sidebars' ), 20 );
 		
 		if ( ! is_admin() ) {
@@ -33,20 +36,21 @@ class Simple_Page_Sidebars {
 		}
 	}
 	
-	
 	/**
-	 * Add widget areas and automatically register page sidebars
+	 * Add custom widget areas and automatically register page sidebars
+	 *
+	 * @since 0.2
 	 */
 	function register_sidebars() {
 		$widget_areas = array();
 		
-		// Add widget areas using this filter
-		$widget_areas = apply_filters( 'simpsid_widget_areas', $widget_areas ); // deprecated
+		// add widget areas using this filter
 		$widget_areas = apply_filters( 'simple_page_sidebars_widget_areas', $widget_areas );
+		$widget_areas = apply_filters( 'simpsid_widget_areas', $widget_areas ); // deprecated
 		
-		// Verify id's exist, otherwise create them
-		// Helps ensure widgets don't get mixed up if widget areas are added or removed
-		if ( is_array( $widget_areas ) ) {
+		// verify id's exist, otherwise create them
+		// helps ensure widgets don't get mixed up if widget areas are added or removed
+		if ( ! empty( $widget_areas ) && is_array( $widget_areas ) ) {
 			foreach ( $widget_areas as $key => $area ) {
 				if ( is_numeric( $key ) ) {
 					$widget_areas[ 'widget-area-' . sanitize_key( $area['name'] ) ] = $area;
@@ -55,19 +59,19 @@ class Simple_Page_Sidebars {
 			}
 		}
 		
-		// Override the default widget properties
+		// override the default widget properties
 		$widget_area_defaults = array(
 			'before_widget' => '<div id="%1$s" class="widget %2$s">',
 			'after_widget' => '</div>',
 			'before_title' => '<h4 class="title">',
 			'after_title' => '</h4>'
 		);
-		$widget_area_defaults = apply_filters( 'simpsid_widget_area_defaults', $widget_area_defaults ); // deprecated
 		$widget_area_defaults = apply_filters( 'simple_page_sidebars_widget_defaults', $widget_area_defaults );
+		$widget_area_defaults = apply_filters( 'simpsid_widget_area_defaults', $widget_area_defaults ); // deprecated
 		
-		// If any custom sidebars have been assigned to pages, merge them with widget areas defined above
+		// if any custom sidebars have been assigned to pages, merge them with already defined widget areas
 		$sidebars = simple_page_sidebars_get_names();
-		if ( count( $sidebars ) ) {
+		if ( ! empty( $sidebars ) ) {
 			foreach ( $sidebars as $sidebar ) {
 				$page_sidebars[ 'page-sidebar-' . sanitize_key( $sidebar ) ] = array(
 					'name' => $sidebar,
@@ -75,12 +79,12 @@ class Simple_Page_Sidebars {
 				);
 			}
 			
-			ksort($page_sidebars);
-			$widget_areas = array_merge_recursive($widget_areas, $page_sidebars);
+			ksort( $page_sidebars );
+			$widget_areas = array_merge_recursive( $widget_areas, $page_sidebars );
 		}
 		
-		if ( is_array( $widget_areas ) ) {
-			// Register the widget areas
+		if ( ! empty( $widget_areas ) && is_array( $widget_areas ) ) {
+			// register the widget areas
 			foreach ( $widget_areas as $key => $area ) {
 				register_sidebar(array(
 					'id' => $key,
@@ -95,12 +99,18 @@ class Simple_Page_Sidebars {
 		}
 	}
 	
-	
+	/**
+	 * Replaces the default sidebar with a custom defined page sidebar
+	 *
+	 * @since 0.2
+	 */
 	function replace_sidebar( $sidebars_widgets ) {
 		global $post;
 		
-		if ( is_page() ) {
-			$custom_sidebar = get_post_meta( $post->ID, '_sidebar_name', true );
+		if ( is_page() || ( is_home() && $posts_page = get_option( 'page_for_posts' ) ) ) {
+			$post_id = ( is_home() ) ? $posts_page : $post->ID;
+			
+			$custom_sidebar = get_post_meta( $post_id, '_sidebar_name', true );
 			$default_sidebar_id = get_option( 'simple_page_sidebars_default_sidebar' );
 			
 			if ( $custom_sidebar && $default_sidebar_id ) {
@@ -118,8 +128,12 @@ class Simple_Page_Sidebars {
 }
 $simple_page_sidebars = new Simple_Page_Sidebars();
 
-
-
+/**
+ * Get an array of custom sidebar names
+ *
+ * @since 0.2
+ * @return array Custom sidebar names
+ */
 function simple_page_sidebars_get_names() {
 	global $wpdb;
 	
@@ -132,7 +146,7 @@ function simple_page_sidebars_get_names() {
 	
 	$sidebars = array();
 	$sidebar_names = $wpdb->get_results($sql);
-	if ( count( $sidebar_names ) ) {
+	if ( ! empty( $sidebar_names ) ) {
 		foreach ( $sidebar_names as $meta ) {
 			$sidebars[] = $meta->meta_value;
 		}
@@ -141,17 +155,17 @@ function simple_page_sidebars_get_names() {
 	return $sidebars;
 }
 
-
-
-/*
+/**
  * Sidebar display template tag
  *
  * Call this function in the template where custom sidebars should be displayed.
  * If a custom sidebar hasn't been defined, the sidebar name passed as the parameter
  * will be served as a fallback.
  *
- * This is no longer the recommended usage. No code changes are required.
+ * This is no longer the recommended usage. No code changes to the theme are
+ * are required for the plugin to work.
  *
+ * @since 0.2
  * @param string $default_sidebar
  */
 function simple_page_sidebar( $default_sidebar ) {
@@ -159,9 +173,9 @@ function simple_page_sidebar( $default_sidebar ) {
 	
 	$sidebar_name = get_post_meta( $post->ID, '_sidebar_name', true );
 	
-	// Last chance to override which sidebar is displayed
-	$sidebar_name = apply_filters( 'simpsid_sidebar_name', $sidebar_name ); // deprecated
+	// last chance to override which sidebar is displayed
 	$sidebar_name = apply_filters( 'simple_page_sidebars_last_call', $sidebar_name );
+	$sidebar_name = apply_filters( 'simpsid_sidebar_name', $sidebar_name ); // deprecated
 	
 	if ( is_page() && ! empty( $sidebar_name ) ) {
 		$sidebars_widgets = wp_get_sidebars_widgets();
@@ -181,7 +195,7 @@ function simple_page_sidebar( $default_sidebar ) {
 	}
 }
 
-/*
+/**
  * Deprecated
  */
 if ( ! function_exists( 'simple_sidebar' ) ) :
