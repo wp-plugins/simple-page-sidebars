@@ -39,7 +39,7 @@ class Simple_Page_Sidebars_Widget_Area extends WP_Widget {
 		?>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'simple-page-sidebars' ); ?></label>
-			<input type="text" name="<?php echo $this->get_field_name( 'title' ); ?>" id="<?php echo $this->get_field_id('title'); ?>" value="<?php esc_attr( $instance['title'] ); ?>" class="widefat" />
+			<input type="text" name="<?php echo $this->get_field_name( 'title' ); ?>" id="<?php echo $this->get_field_id('title'); ?>" value="<?php echo esc_attr( $instance['title'] ); ?>" class="widefat" />
 		</p>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'area_id' ); ?>"><?php _e( 'Area Name:', 'simple-page-sidebars' ); ?></label>
