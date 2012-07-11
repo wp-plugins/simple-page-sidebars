@@ -3,25 +3,48 @@ Contributors: blazersix, bradyvercher
 Donate link: http://bit.ly/s2zcgD
 Tags: sidebars, custom sidebars, dynamic sidebar, simple, widget, widgets
 Requires at least: 3.2.1
-Tested up to: 3.3.2
+Tested up to: 3.4.1
 Stable tag: 0.2.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Assign custom, widget-enabled sidebars to any page with ease.
+Easily assign custom, widget-enabled sidebars to any page.
 
 == Description ==
 
-Designed for simplicity and flexibility, Simple Page Sidebars gives WordPress users and theme authors the ability to assign custom sidebars to individual pages--without making any template changes. Existing sidebars can be assigned in quick edit and bulk edit modes, helping save you time.
+Designed for simplicity and flexibility, Simple Page Sidebars gives WordPress users, designers, and developers the ability to assign custom sidebars to individual pages--without making any template changes. Existing sidebars can also be assigned in quick edit and bulk edit modes, helping save you time.
 
-Also included is a widget to allow a sidebar to include all the widgets from any other widget area.
+= Benefits =
+
+* No more site-wide, generic sidebars. Each page (or section) can have its own widgets.
+* Complete control over sidebar names.
+* Assign the same sidebar to multiple pages.
+* A page's sidebar can be modified without creating a pointless revision.
+
+Simple Page Sidebars also comes with a "Widget Area" widget for including all the widgets from one sidebar into another.
 
 == Installation ==
 
 Installing Simple Page Sidebars is just like installing most other plugins. [Check out the codex](http://codex.wordpress.org/Managing_Plugins#Installing_Plugins) if you have any questions.
 
 #### Setup
-After installation, go to the Reading options panel (the Reading link under Settings) and choose the default sidebar.
+After installation, go to the Reading options panel (the Reading link under Settings) and choose which registered sidebar is the default sidebar.
 
-*Note: The initial version of Simple Page Sidebars required a template change that is no longer needed in the latest release. It's recommended that any code changes be reverted.*
+== Frequently Asked Questions ==
+
+= Why is the default sidebar still showing after I've created a custom sidebar for a page? =
+
+If you haven't added any widgets to your new custom sidebar, the default sidebar will continue to display. If you really want a blank sidebar, just add an empty text widget.
+
+= How do I give my blog a different sidebar? =
+
+We recommend that you set your blog to use the default sidebar and create custom sidebars for pages (including the front/homepage). That way your blog page and posts all have the same sidebar.
+
+However, if you defined a page for your posts in the Reading settings panel and assigned a custom sidebar to that page, that will work, too.
+
+= Can I hide the "Sidebar" column on the Pages screen in the admin panel? =
+
+Yes, just click the "Screen Options" tab in the upper right corner of your screen and uncheck the "Sidebar" option.
 
 == Screenshots ==
 
@@ -29,7 +52,24 @@ After installation, go to the Reading options panel (the Reading link under Sett
 2. The new sidebar shows up on the widget panel. Notice the new "Widget Area" widget for including other widget areas.
 3. Bulk edit in action. Easily assign a sidebar to multiple pages. (Quick edit works, too!)
 
+== Notes ==
+
+The philosphy behind creating this plugin was to make it easy to use and integrate it into the WordPress admin panel as seamlessly as possible. It's not the end-all, be-all solution for custom sidebars, but should handle the majority of use cases. We contemplated adding additional features and could have created an options page, but wanted to keep it simple and probably would have polluted it with credit meta boxes and whatnot.
+
+The aim is basic, core-like functionality and integration.
+
+= Custom Loops =
+
+If your page has any custom loops or queries, they need to be followed by `wp_reset_query()`, otherwise the global `$post` variable will no longer reference the correct post and by the time the sidebar is displayed, Simple Page Sidebars won't know which page is being viewed, which can lead to an unexpected sidebar being displayed.
+
+= Theme Sidebars =
+
+Some themes create different sidebars for their various page templates, which means there isn't a default sidebar that can be replaced. The only workaround to continue using Simple Page Sidebars in this instance is to create a child theme to force page templates with custom sidebars to use the default sidebar.
+
 == Changelog ==
+
+= 1.0 =
+* Modified check for blog page.
 
 = 0.2.1 =
 * Now works for the blog page when it's set in the Reading Settings.

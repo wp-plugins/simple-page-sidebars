@@ -1,11 +1,30 @@
 <?php
 /*
 Plugin Name: Simple Page Sidebars
-Version: 0.2.1
+Version: 1.0
 Plugin URI: http://wordpress.org/extend/plugins/simple-page-sidebars/
 Description: Assign custom, widget-enabled sidebars to any page with ease.
 Author: Blazer Six, Inc.
 Author URI: http://www.blazersix.com/
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+------------------------------------------------------------------------
+Copyright 2012  Blazer Six, Inc.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 
@@ -108,7 +127,7 @@ class Simple_Page_Sidebars {
 		global $post;
 		
 		if ( is_page() || ( is_home() && $posts_page = get_option( 'page_for_posts' ) ) ) {
-			$post_id = ( is_home() ) ? $posts_page : $post->ID;
+			$post_id = ( ! empty( $posts_page ) ) ? $posts_page : $post->ID;
 			
 			$custom_sidebar = get_post_meta( $post_id, '_sidebar_name', true );
 			$default_sidebar_id = get_option( 'simple_page_sidebars_default_sidebar' );
