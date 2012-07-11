@@ -1,10 +1,10 @@
 === Simple Page Sidebars ===
-Contributors: blazersix
+Contributors: blazersix, bradyvercher
 Donate link: http://bit.ly/s2zcgD
 Tags: sidebars, custom sidebars, dynamic sidebar, simple, widget, widgets
 Requires at least: 3.2.1
-Tested up to: 3.3
-Stable tag: 0.2
+Tested up to: 3.3.2
+Stable tag: trunk
 
 Assign custom, widget-enabled sidebars to any page with ease.
 
@@ -30,6 +30,10 @@ After installation, go to the Reading options panel (the Reading link under Sett
 3. Bulk edit in action. Easily assign a sidebar to multiple pages. (Quick edit works, too!)
 
 == Changelog ==
+
+= 0.2.1 =
+* Now works for the blog page when it's set in the Reading Settings.
+* Bug fixes.
 
 = 0.2 =
 * Added an option to define the default sidebar on the Reading options panel.
