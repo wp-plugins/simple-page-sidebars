@@ -3,7 +3,7 @@
  * Plugin Name: Simple Page Sidebars
  * Plugin URI: http://wordpress.org/extend/plugins/simple-page-sidebars/
  * Description: Assign custom, widget-enabled sidebars to any page with ease.
- * Version: 1.1
+ * Version: 1.1.1
  * Author: Blazer Six, Inc.
  * Author URI: http://www.blazersix.com/
  * License: GPLv2 or later
@@ -23,7 +23,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc., 59
  * Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * @package Simple Page Sidebars
+ * @package Simple_Page_Sidebars
  * @author Brady Vercher <brady@blazersix.com>
  * @copyright Copyright (c) 2012, Blazer Six, Inc.
  * @license http://www.gnu.org/licenses/gpl-2.0.html
@@ -118,10 +118,11 @@ class Simple_Page_Sidebars {
 		// Override the default widget properties.
 		$widget_area_defaults = array(
 			'before_widget' => '<div id="%1$s" class="widget %2$s">',
-			'after_widget' => '</div>',
-			'before_title' => '<h4 class="title">',
-			'after_title' => '</h4>'
+			'after_widget'  => '</div>',
+			'before_title'  => '<h4 class="title">',
+			'after_title'   => '</h4>'
 		);
+		
 		$widget_area_defaults = apply_filters( 'simple_page_sidebars_widget_defaults', $widget_area_defaults );
 		
 		// If any custom sidebars have been assigned to pages, merge them with already defined widget areas.
@@ -145,10 +146,10 @@ class Simple_Page_Sidebars {
 					'id'            => $key,
 					'name'          => $area['name'],
 					'description'   => $area['description'],
-					'before_widget' => ( ! isset( $area['before_widget'] ) ) ? $widget_area_defaults['before_widget'] : $area['before_widget'],
-					'after_widget'  => ( ! isset( $area['after_widget'] ) ) ? $widget_area_defaults['after_widget'] : $area['after_widget'],
-					'before_title'  => ( ! isset( $area['before_title'] ) ) ? $widget_area_defaults['before_title'] : $area['before_title'],
-					'after_title'   => ( ! isset( $area['after_title'] ) ) ? $widget_area_defaults['after_title'] : $area['after_title']
+					'before_widget' => ( isset( $area['before_widget'] ) ) ? $area['before_widget'] : $widget_area_defaults['before_widget'],
+					'after_widget'  => ( isset( $area['after_widget'] ) )  ? $area['after_widget']  : $widget_area_defaults['after_widget'],
+					'before_title'  => ( isset( $area['before_title'] ) )  ? $area['before_title']  : $widget_area_defaults['before_title'],
+					'after_title'   => ( isset( $area['after_title'] ) )   ? $area['after_title']   : $widget_area_defaults['after_title']
 				));
 			}
 		}
@@ -163,7 +164,9 @@ class Simple_Page_Sidebars {
 	public static function replace_sidebar( $sidebars_widgets ) {
 		global $post;
 		
-		if ( is_page() || ( is_home() && $posts_page = get_option( 'page_for_posts' ) ) ) {
+		$supports = ( isset( $post->post_type ) && post_type_supports( $post->post_type, 'simple-page-sidebars' ) ) ? true : false;
+		
+		if ( is_page() || $supports || ( is_home() && $posts_page = get_option( 'page_for_posts' ) ) ) {
 			$post_id = ( ! empty( $posts_page ) ) ? $posts_page : $post->ID;
 			
 			$custom_sidebar = get_post_meta( $post_id, '_sidebar_name', true );
@@ -209,11 +212,9 @@ class Simple_Page_Sidebars {
 function simple_page_sidebars_get_names() {
 	global $wpdb;
 	
-	$sidebar_names = $wpdb->get_results( "SELECT meta_value
+	$sidebar_names = $wpdb->get_results( "SELECT DISTINCT meta_value
 		FROM $wpdb->posts p, $wpdb->postmeta pm
-		WHERE p.post_type='page' AND p.post_status!='auto-draft' AND p.ID=pm.post_id
-			AND pm.meta_key='_sidebar_name'
-		GROUP BY pm.meta_value
+		WHERE p.post_status!='auto-draft' AND p.ID=pm.post_id AND pm.meta_key='_sidebar_name'
 		ORDER BY pm.meta_value ASC" );
 	
 	$sidebars = array();

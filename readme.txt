@@ -68,6 +68,11 @@ Some themes create different sidebars for their various page templates, which me
 
 == Changelog ==
 
+= 1.1.1 =
+* Worked around the slashing weirdness in WordPress API.
+* Implemented a method to allow developers to easily add support for additional post types. No plans to build this out further, it's just here for additional flexibility if more complex solutions aren't wanted.
+* Added a filter to disable the edit link in the custom Sidebar column (`simple_page_sidebars_show_edit_link_in_column`).
+
 = 1.1 =
 * Added an Edit Sidebar screen for updating a sidebar name and associated pages.
 * Added an update message when a sidebar is saved on the Add/Edit Page screen.
