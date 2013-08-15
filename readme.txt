@@ -29,19 +29,10 @@ Simple Page Sidebars also ships with a "Widget Area" widget for pulling all the 
 
 If you want to assign custom sidebars to archive pages or replace multiple sidebars per page, this plugin likely won't be the best solution. However it's flexible enough to handle a wide range of page-based use cases. It can even be configured to work with Custom Post Types by adding a couple lines of code:
 
-<<<<<<< HEAD
 `function myprefix_init() {
 	add_post_type_support( '{{post_type}}', 'simple-page-sidebars' );
 }
 add_action( 'init', 'myprefix_init' );`
-=======
-```
-function myprefix_init() {
-	add_post_type_support( '{{post_type}}', 'simple-page-sidebars' );
-}
-add_action( 'init', 'myprefix_init' );
-```
->>>>>>> 21acab5d3039a91b9624d909af62444e0142ef3a
 
 = Additional Resources =
 
